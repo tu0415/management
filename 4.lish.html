@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>品牌管理</title>
+    <script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
+    <style>
+        #app {
+            width: 600px;
+            margin: 10px auto;
+        }
+
+        .tb {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .tb th {
+            background-color: #0094ff;
+            color: white;
+        }
+
+        .tb td,
+        .tb th {
+            padding: 5px;
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        .add {
+            padding: 5px;
+            border: 1px solid black;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <brand-manager></brand-manager>
+    </div>
+    <a href=""></a>
+</body>
+<script type="text/html" id="templateId">
+    <div>
+            <div class="add">
+                编号:
+                <input v-model="id" type="text"> 品牌名称:
+                <input v-model="name" @keyup.enter="add" type="text">
+                <input type="button" @click="add" value="添加">
+            </div>
+
+            <div class="add">
+                品牌名称:
+                <!-- 如果我们调用的函数，没有参数，我们可以加()，也可以不加 -->
+                <!-- 要获取他的值要绑定v-model="keyword" -->
+                <input type="text" placeholder="请输入搜索条件" @keyup.13="search()" v-model="keyword" >
+            </div>
+            <table class="tb">
+                <tr>
+                    <th>编号</th>
+                    <th>品牌名称</th>
+                    <th>创立时间</th>
+                    <th>操作</th>
+                </tr>
+                <tr v-if="brandList.length === 0">
+                    <td colspan="4">没有数据啦</td>
+                </tr>
+                <!-- 动态生成内容tr -->
+                <tr v-for="item in brandList" :key="item.id">
+                    <td>{{item.id}}</td>
+                    <td>{{item.name}}</td>
+                    <td>{{item.ctime}}</td>
+                    <td>
+						<a @click="deleteById(item.id)" href="#">删除</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+   
+</script>
+<script>
+    // Vue.component = extend
+    //定义和注册一步到位
+    Vue.component('brand-manager', {
+        template: `#templateId`,
+        data() {
+            return {
+                brandList: [
+                    { id: 1, name: '张三', ctime: new Date() },
+                    { id: 2, name: '李四', ctime: new Date() }
+                ],
+                oldBrandList:[
+                    {id:1,name:'张三',ctime:new Date()},
+                    {id:2,name:'李四',ctime:new Date()}
+                ],
+                id:"",
+                name:"",
+                keyword:""
+            }
+        },
+        methods: {
+            add() {
+                this.brandList.push({
+                    id: this.id,
+                    name: this.name,
+                    ctime: new Date()
+                })
+                // 把新的brandList数组赋值给oldBrandList,保存起来
+                this.oldBrandList = this.brandList
+                // 重置id 和name的值 即清空输入框的值
+                this.id=""
+                this.name=""
+
+            },
+            deleteById(id) {
+                // console.log(id)
+                // findIndex的作用是遍历brandList里面的每个一个元素  item 指定就是每一个元素
+                const index = this.brandList.findIndex(item => {
+                    return item.id === id
+                })
+
+                // console.log(index)
+                this.brandList.splice(index, 1)
+                // /把最新的brandList数组赋值给oldBrandList，保存起来
+                this.oldBrandList = this.brandList
+            },
+            search(){
+
+                if(this.keyword.trim().length === 0){
+                    this.brandList = this.oldBrandList
+                    // Console.log("没有输入内容")
+                    return
+                }
+                // 因为this指向变了,以下是几种解决方法
+                // const newBrandList = this.brandList.filter(function(item){
+                //     return item.name.includes(this.keyword) // 因为这里的this变了,所以后面要加上 bind(this)
+                // },bind(this))
+                
+                // const _this = this;
+                // const newBrandList = _this.brandList.filter(item=>{
+                //     return item.name.includes(_this.keyword) 
+                // })
+                const newBrandList = this.brandList.filter(function(item){
+                    // console.log(this.keyword)
+                    return item.name.includes(this.keyword)
+                },this)
+
+                // 覆盖原先的数组
+                this.brandList = newBrandList
+            }
+
+        }
+
+    })
+
+    var vm = new Vue({
+        el: "#app"
+    })
+</script>
+
+</html>
